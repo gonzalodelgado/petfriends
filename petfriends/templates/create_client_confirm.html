@@ -30,15 +30,21 @@ along with petfriends.  If not, see <http://www.gnu.org/licenses/>.
   </dl>
   {% with object.get_pets as pets %}
   <h2>Pet{{ object.get_pets|pluralize }}</h2>
-  {% for pet in pets %}
-  <dl>
-    <dt>Name</dt><dd>{{ pet.name }}</dd>
-    <dt>Age</dt><dd>{{ pet.age }}</dd>
-    <dt>Type</dt><dd>{{ pet.pet_type }}</dd>
-  </dl>
-  {% if not forloop.last %}<hr />{% endif %}
-  {% endfor %}
+  <table class="table">
+    <thead>
+      <tr><th>Name</th><th>Age</th><th>Type</th></tr>
+    </thead>
+    <tbody>
+    {% for pet in pets %}
+    <tr>
+      <td>{{ pet.name  }}</td><td>{{ pet.age }}</td><td>{{ pet.pet_type  }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
   {% endwith %}
 </div>
-<a href="{% url client_create %}" class="btn">Continue</a>
+<div class="row">
+<a href="{% url client_create %}" class="btn pull-right">Continue</a>
+</div>
 {% endblock %}

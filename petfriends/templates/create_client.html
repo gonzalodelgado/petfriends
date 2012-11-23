@@ -20,12 +20,48 @@ along with petfriends.  If not, see <http://www.gnu.org/licenses/>.
 {% block content %}
 <h1>Please enter new client's information</h1>
 <form method="post" action="">
-  <fieldset>
-    {% csrf_token %}
-    {{ form.as_p }}
+  {% csrf_token %}
+  <div class="row">
+    <fieldset class="span4 offset4">
+      <legend>Personal data</legend>
+      {% for field in form %}
+      <div class="control-group{% if field.errors %} error{% endif %}">
+        <label class="control-label" for="id_{{ field.html_name }}">{{ field.label  }}</label>
+        <div class="control">
+          {% if field.errors %}
+          <span class="help-inline">{{ field.errors|join:" " }}</span>
+          {% endif %}
+          {{ field  }}
+        </div>
+      </div>
+      {% endfor %}
+    </fieldset>
+  </div>
+  <fieldset class="row-fluid">
+    <legend>Pets</legend>
+    {{ formset.management_form }}
+    {% for petform in formset %}
+      {% if forloop.first %}
+        {% if formset.non_form_errors %}
+          <span class="label label-important">{{ formset.non_form_errors|join:", " }}</span>
+        {% endif %}
+      {% endif %}
+      <div class="form-inline span12">
+      {% for field in petform %}
+      {% if field.is_hidden %}{{ field  }}{% else %}
+        {% if field.errors %}
+        <span class="help-inline">{{ field.errors|join:" " }}</span>
+        {% endif %}
+        <label>
+          {{ field.label }}
+          {{ field }}
+        </label>
+      {% endif %}
+      {% endfor %}
+      </div>
+    {% endfor %}
   </fieldset>
-  {{ formset.non_form_errors }}
-  {{ formset }}
-  <button type="submit" class="btn">Submit</button>
+  <button type="submit" class="btn btn-primary span2 offset8">Submit</button>
+  </div>
 </form>
 {% endblock %}
