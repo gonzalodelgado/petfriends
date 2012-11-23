@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from django.views.generic import DetailView
 
 from clientsandpets.models import Client
-from clientsandpets.views import ClientCreateView
+from clientsandpets.views import ClientCreateView, ClientSerializedDetailView
 
 
 urlpatterns = patterns('',
@@ -30,4 +30,6 @@ urlpatterns = patterns('',
        name='client_create'),
     url(r'^(?P<pk>\d+)/confirm/$', DetailView.as_view(
         template_name='create_client_confirm.html', model=Client)),
+    url(r'^clients/(?P<pk>\d+)/$', ClientSerializedDetailView.as_view(
+        model=Client)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

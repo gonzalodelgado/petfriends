@@ -15,8 +15,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with petfriends.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.views.generic import CreateView
-from django.forms.models import inlineformset_factory
+from django.utils import simplejson
+from django.http import HttpResponse
+from django.views.generic import CreateView, View
+from django.views.generic.detail import SingleObjectMixin
+from django.forms.models import inlineformset_factory, model_to_dict
 
 from clientsandpets.models import Client, Pet
 from clientsandpets.forms import PetFormSet
@@ -54,3 +57,11 @@ class ClientCreateView(CreateView):
             return self.data_valid(form, formset)
         else:
             return self.data_invalid(form, formset)
+
+
+class ClientSerializedDetailView(SingleObjectMixin, View):
+    def get(self, request, *args, **kwargs):
+        self.object = client = self.get_object()
+        data = model_to_dict(client)
+        data['pets'] = [model_to_dict(pet) for pet in client.pet_set.all()]
+        return HttpResponse(simplejson.dumps(data), mimetype='application/json')
