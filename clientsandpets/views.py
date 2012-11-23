@@ -15,8 +15,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with petfriends.  If not, see <http://www.gnu.org/licenses/>.
 
+from xml.dom import minidom
+from xml.etree import ElementTree as ET
+
 from django.utils import simplejson
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.utils.encoding import smart_unicode
 from django.views.generic import CreateView, View
 from django.views.generic.detail import SingleObjectMixin
 from django.forms.models import inlineformset_factory, model_to_dict
@@ -60,8 +64,40 @@ class ClientCreateView(CreateView):
 
 
 class ClientSerializedDetailView(SingleObjectMixin, View):
+    valid_formats = 'json', 'xml'
+    default_format = 'json'
+
+    def json_response(self, data):
+        return HttpResponse(simplejson.dumps(data), mimetype='application/json')
+
+    def xml_response(self, data):
+        client_data = data.copy()
+        pets_data = client_data.pop('pets')
+        client_element = ET.Element('client')
+        for key, value in client_data.iteritems():
+            subelement = ET.SubElement(client_element, key)
+            subelement.text = smart_unicode(value)
+        pets_element = ET.SubElement(client_element, 'pets')
+        for pet_data in pets_data:
+            pet_element = ET.SubElement(pets_element, 'pet')
+            for key, value in pet_data.iteritems():
+                subelement = ET.SubElement(pet_element, key)
+                subelement.text = smart_unicode(value)
+        xml = minidom.parseString(ET.tostring(client_element, encoding='utf-8'))
+        return HttpResponse(xml.toprettyxml(indent="  "), mimetype='application/xml')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.format = request.GET.get('format', self.default_format)
+        if self.format.lower() not in self.valid_formats:
+            return HttpResponseBadRequest(
+                '%s is not a valid data format' % self.format)
+        return super(ClientSerializedDetailView,
+                     self).dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         self.object = client = self.get_object()
         data = model_to_dict(client)
         data['pets'] = [model_to_dict(pet) for pet in client.pet_set.all()]
-        return HttpResponse(simplejson.dumps(data), mimetype='application/json')
+        if self.format == 'xml':
+            return self.xml_response(data)
+        return self.json_response(data)
