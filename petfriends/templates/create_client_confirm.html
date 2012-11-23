@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% comment %}
+This file is part of petfriends.
+
+petfriends is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+petfriends is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with petfriends.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% block content %}
+<h1>New Client data</h1>
+<div class="well">
+  <h2>Client</h2>
+  <dl>
+    <dt>ID</dt><dd>{{ object.id }}</dd>
+    <dt>Name</dt><dd>{{ object.name }}</dd>
+    <dt>Phone Number</dt><dd>{{ object.phone_number }}</dd>
+    <dt>Email</dt><dd>{{ object.email }}</dd>
+    <dt>Home Address</dt><dd>{{ object.home_address }}</dd>
+  </dl>
+  {% with object.get_pets as pets %}
+  <h2>Pet{{ object.get_pets|pluralize }}</h2>
+  {% for pet in pets %}
+  <dl>
+    <dt>Name</dt><dd>{{ pet.name }}</dd>
+    <dt>Age</dt><dd>{{ pet.age }}</dd>
+    <dt>Type</dt><dd>{{ pet.pet_type }}</dd>
+  </dl>
+  {% if not forloop.last %}<hr />{% endif %}
+  {% endfor %}
+  {% endwith %}
+</div>
+<a href="{% url client_create %}" class="btn">Continue</a>
+{% endblock %}
